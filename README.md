@@ -309,7 +309,7 @@ ORM
 Infrastructure
 
 - Docker
-- Docker Compose
+- Docker Compose (PostgreSQL local)
 
 # Project Structure
 
@@ -319,13 +319,13 @@ frontend
 React application
 
 backend  
-Node.js REST API
+Node.js REST API (run locally with npm)
 
 database  
 SQL initialization scripts
 
 docker-compose.yml  
-Docker configuration
+PostgreSQL local configuration
 
 # Development Goal
 
@@ -376,27 +376,51 @@ DELETE /api/games/:id/tags/:tagId
 
 # Docker Setup
 
-The project runs locally using Docker Compose.
+The project now uses Docker Compose for the database only.
 
-Services:
+Service:
 
-- frontend (React dev server)
-- backend (Node.js API)
 - postgres (PostgreSQL database)
 
-Start the project with:
+Start PostgreSQL with:
 
-docker-compose up
+`docker compose up -d postgres`
 
-The backend connects to PostgreSQL using the environment variables defined in the Environment Variables section.
+Stop it with:
+
+`docker compose stop postgres`
+
+The backend is intended to run locally from the `backend` folder with npm, using `backend/.env`.
+
+# Local Backend Setup
+
+1. Start PostgreSQL with Docker Compose from the project root.
+2. Create `backend/.env` from `backend/.env.example` if needed.
+3. Install backend dependencies in `backend/`.
+4. Generate the Prisma client.
+5. Optionally load reusable local sample data with `npm run db:seed` from `backend/`.
+6. Start the API locally.
+
+Validated local endpoints:
+
+- `GET /`
+- `GET /api/health`
+- `GET /api/games`
+- `GET /api/games?limit=10`
 
 # Environment Variables
 
-POSTGRES_HOST=postgres
+Root `.env` (used by Docker Compose for PostgreSQL):
+
 POSTGRES_PORT=5432
 POSTGRES_DB=game_library
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
+
+Backend `backend/.env`:
+
+PORT=3000
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/game_library?schema=public
 
 # Frontend Architecture
 
@@ -459,7 +483,7 @@ Express middleware
 db  
 Database configuration
 
-server.js  
+server.ts  
 Application entry point
 
 # ORM
