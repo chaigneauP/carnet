@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum GameStatus {
+  backlog
+  playing
+  completed
+  dropped
+}
+
+enum PlaythroughStatus {
+  Completed
+  InProgress @map("In Progress")
+  Dropped
+}
+
+model Game {
+  id           BigInt        @id @default(autoincrement())
+  title        String
+  developer    String?
+  releaseYear  Int?          @map("release_year")
+  genre        String?
+  coverUrl     String?       @map("cover_url")
+  description  String?
+  status       GameStatus    @default(backlog)
+  playtimeTotal Decimal      @default(0) @map("playtime_total") @db.Decimal(6, 1)
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+  rating       Rating?
+  playthroughs Playthrough[]
+  gameTags     GameTag[]
+
+  @@index([status])
+  @@map("games")
+}
+
+model Rating {
+  id           BigInt   @id @default(autoincrement())
+  gameId       BigInt   @unique @map("game_id")
+  gameplay     Decimal? @db.Decimal(3, 1)
+  levelDesign  Decimal? @map("level_design") @db.Decimal(3, 1)
+  story        Decimal? @db.Decimal(3, 1)
+  atmosphere   Decimal? @db.Decimal(3, 1)
+  replayability Decimal? @db.Decimal(3, 1)
+  overallScore Decimal? @map("overall_score") @db.Decimal(3, 1)
+  notes        String?
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  game         Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@map("ratings")
+}
+
+model Playthrough {
+  id                    BigInt            @id @default(autoincrement())
+  gameId                BigInt            @map("game_id")
+  platform              String
+  startDate             DateTime?         @map("start_date") @db.Date
+  endDate               DateTime?         @map("end_date") @db.Date
+  playtimeHours         Decimal           @default(0) @map("playtime_hours") @db.Decimal(6, 1)
+  status                PlaythroughStatus
+  notes                 String?
+  difficulty            String?
+  achievementsCompleted Int?              @map("achievements_completed")
+  createdAt             DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  game                  Game              @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@index([gameId])
+  @@index([status])
+  @@map("playthroughs")
+}
+
+model Tag {
+  id       BigInt    @id @default(autoincrement())
+  name     String    @unique
+  gameTags GameTag[]
+
+  @@map("tags")
+}
+
+model GameTag {
+  gameId BigInt @map("game_id")
+  tagId  BigInt @map("tag_id")
+  game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([gameId, tagId])
+  @@index([tagId])
+  @@map("game_tags")
+}
+
