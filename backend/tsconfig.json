@@ -7,12 +7,25 @@
     "rootDir": "src",
     "outDir": "dist",
     "strict": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "useDefineForClassFields": false,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "types": ["node"]
+    "types": ["node", "jest"],
+    "sourceMap": true
   },
-  "include": ["src/**/*.ts"],
+  "include": [
+    "src/main.ts",
+    "src/app.controller.ts",
+    "src/app.module.ts",
+    "src/common/**/*.ts",
+    "src/database/**/*.ts",
+    "src/games/**/*.ts",
+    "src/health/**/*.ts",
+    "src/scripts/**/*.ts"
+  ],
   "exclude": ["dist", "node_modules"]
 }

@@ -296,7 +296,7 @@ Frontend
 Backend
 
 - Node.js
-- Express
+- NestJS 11.1.16
 
 Database
 
@@ -304,7 +304,7 @@ Database
 
 ORM
 
-- Prisma
+- TypeORM 0.3.28
 
 Infrastructure
 
@@ -397,7 +397,7 @@ The backend is intended to run locally from the `backend` folder with npm, using
 1. Start PostgreSQL with Docker Compose from the project root.
 2. Create `backend/.env` from `backend/.env.example` if needed.
 3. Install backend dependencies in `backend/`.
-4. Generate the Prisma client.
+4. Run `npm run check` in `backend/`.
 5. Optionally load reusable local sample data with `npm run db:seed` from `backend/`.
 6. Start the API locally.
 
@@ -407,6 +407,7 @@ Validated local endpoints:
 - `GET /api/health`
 - `GET /api/games`
 - `GET /api/games?limit=10`
+- `GET /api/games/:id`
 
 # Environment Variables
 
@@ -453,51 +454,58 @@ Page layouts and navigation
 
 # Backend Architecture
 
-The backend is a REST API built with Node.js and Express.
+The backend is a REST API built with Node.js and NestJS.
 
 Responsibilities:
 
 - expose REST endpoints
 - manage business logic
-- communicate with PostgreSQL via Prisma ORM
+- communicate with PostgreSQL via TypeORM
+- validate transient HTTP payloads with DTOs
 
 Suggested folder structure:
 
 backend/src
 
-routes  
-Express route definitions
+main.ts  
+NestJS application entry point
 
-controllers  
-HTTP request handlers
+app.module.ts  
+Root module
 
-services  
-Business logic
+app.controller.ts  
+Root route controller
 
-models  
-Database access layer (Prisma)
+health  
+Health module and PostgreSQL probe
 
-middleware  
-Express middleware
+games  
+Games module, controller and business logic
 
-db  
-Database configuration
+games/dto  
+DTOs for params, query strings, commands and responses
 
-server.ts  
-Application entry point
+games.mapper.ts  
+Mapping between DTOs and TypeORM entities
+
+database/entities  
+TypeORM entity mappings
+
+common/filters  
+HTTP exception formatting
 
 # ORM
 
-The backend uses **Prisma ORM** to interact with PostgreSQL.
+The backend uses **TypeORM 0.3.28** to interact with PostgreSQL.
 
-Prisma provides:
+TypeORM provides:
 
-- database schema definition
-- migrations
-- type-safe database queries
-- simplified relations handling
+- entity mapping on the existing SQL schema
+- repository and query builder access
+- explicit relation loading
+- predictable integration with NestJS modules
 
-The Prisma schema will define the following models:
+The mapped domain models are:
 
 - Game
 - Playthrough
